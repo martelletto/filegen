@@ -21,6 +21,7 @@
 long randomise = 0;		/* whether to write random bytes */
 long reporting = 1;		/* report corrupt/invalid files */
 long interval = 0;		/* max nanosecs between writes */
+long syncwrite = 0;		/* call fsync() before closing */
 unsigned maxfilesiz = 1 << 24;	/* max size of individual file */
 unsigned totalbytes = 1 << 30;	/* total bytes to write/verify */
 const char *prefix = "";	/* prefix for test files */
@@ -180,6 +181,9 @@ writef(int n, void *buf, unsigned int size)
 			nanosleep(&itv, NULL);
 	}
 
+	if (syncwrite)
+		fsync(fd);
+
 	close(fd);
 }
 
@@ -187,7 +191,7 @@ __dead void
 usage(void)
 {
 	fprintf(stderr,
-"usage: filegen [-rv] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
+"usage: filegen [-rvS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
 "               [-t totalbytes] directory\n");
 	exit(1);
 }
@@ -201,7 +205,7 @@ main(int argc, char **argv)
 	const char *action = "writing";
 	void *buf;
 
-	while ((ch = getopt(argc, argv, "f:i:p:rs:t:v")) != -1) {
+	while ((ch = getopt(argc, argv, "f:i:p:rs:t:vS")) != -1) {
 		switch (ch) {
 		case 'f':
 			maxfilesiz = strtonum(optarg, 1, UINT_MAX, &errstr);
@@ -235,6 +239,9 @@ main(int argc, char **argv)
 			action = "verifying";
 			verifying = 1;
 			break;
+		case 'S':
+			syncwrite = 1;
+			break;
 		default:
 			usage();
 		}
@@ -249,7 +256,9 @@ main(int argc, char **argv)
 	if (maxfilesiz > totalbytes)
 		errx(1, "max file size bigger than total size");
 	if (interval != 0 && verifying)
-		warn("interval when verifying doesn't make sense");
+		warn("interval when verifying doesn't make sense; ignoring");
+	if (syncwrite != 0 && verifying)
+		warn("syncing when verifying doesn't make sense; ignoring");
 
 	if (chdir(argv[0]) != 0)
 		err(1, "chdir");
