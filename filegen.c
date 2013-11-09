@@ -16,22 +16,22 @@ long randomise = 0;		/* whether to write random bytes */
 long reporting = 1;		/* report corrupt/invalid files */
 long interval = 0;		/* max nanosecs between writes */
 long syncwrite = 0;		/* call fsync() before closing */
-unsigned maxfilesiz = 1 << 24;	/* max size of individual file */
-unsigned totalbytes = 1 << 30;	/* total bytes to write/verify */
+size_t maxfilesiz = 1 << 24;	/* max size of individual file */
+size_t totalbytes = 1 << 30;	/* total bytes to write/verify */
 const char *prefix = "";	/* prefix for test files */
 
 static struct timespec itv;
 static char path[_POSIX_PATH_MAX + 1];
 
-unsigned int
-nextrand(unsigned int limit)
+size_t
+nextrand(size_t limit)
 {
-	unsigned int r;
-	while ((r = (unsigned int)rand()) > limit);
+	size_t r;
+	while ((r = (size_t)rand()) > limit);
 	return (r);
 }
 
-unsigned int
+size_t
 nextfilesiz(void)
 {
 	if (maxfilesiz > totalbytes)
@@ -39,19 +39,19 @@ nextfilesiz(void)
 	return (nextrand(maxfilesiz));
 }
 
-unsigned int
-nextchunksiz(unsigned int size, unsigned int threshold)
+size_t
+nextchunksiz(size_t size, size_t threshold)
 {
 	if (size > threshold)
 		return (nextrand(threshold));
 	return (size);
 }
 
-unsigned int
+size_t
 nextbyte(int n)
 {
 	if (randomise == 0) {
-		unsigned int r;
+		size_t r;
 		memset(&r, n, sizeof(r));
 		return (r);
 	} else
@@ -68,19 +68,19 @@ mkpath(int n)
 }
 
 void
-fillbuf(int n, void *buf, unsigned int size)
+fillbuf(int n, void *buf, size_t size)
 {
-	unsigned int *p = buf;
-	int rest = size % sizeof(unsigned int);
+	size_t *p = buf;
+	int rest = size % sizeof(size_t);
 	size -= rest;
 
 	while (size > 0) {
 		*p++ = nextbyte(n);
-		size -= sizeof(unsigned int);
+		size -= sizeof(size_t);
 	}
 
 	if (rest != 0) {
-		unsigned int last = nextbyte(n);
+		size_t last = nextbyte(n);
 		unsigned char *cp1 = (unsigned char *)p;
 		unsigned char *cp2 = (unsigned char *)&last;
 		while (rest--)
@@ -89,20 +89,20 @@ fillbuf(int n, void *buf, unsigned int size)
 }
 
 int
-checkbuf(int n, void *buf, unsigned int size)
+checkbuf(int n, void *buf, size_t size)
 {
-	unsigned int *p = buf;
-	int ok = 1, rest = size % sizeof(unsigned int);
+	size_t *p = buf;
+	int ok = 1, rest = size % sizeof(size_t);
 	size -= rest;
 
 	while (size > 0) {
 		if (*p++ != nextbyte(n))
 			ok = 0;
-		size -= sizeof(unsigned int);
+		size -= sizeof(size_t);
 	}
 
 	if (rest != 0) {
-		unsigned int last = nextbyte(n);
+		size_t last = nextbyte(n);
 		unsigned char *cp1 = (unsigned char *)p;
 		unsigned char *cp2 = (unsigned char *)&last;
 		while (rest--)
@@ -114,9 +114,9 @@ checkbuf(int n, void *buf, unsigned int size)
 }
 
 void
-chkread(ssize_t nread, unsigned int chunksiz)
+chkread(ssize_t nread, size_t chunksiz)
 {
-	if (reporting && nread != chunksiz) {
+	if (reporting && nread != (ssize_t)chunksiz) {
 		reporting = 0;
 		if (nread < 0)
 			warn("read");
@@ -128,7 +128,7 @@ chkread(ssize_t nread, unsigned int chunksiz)
 }
 
 void
-verify(int n, void *buf, unsigned int size)
+verify(int n, void *buf, size_t size)
 {
 	ssize_t r;
 
@@ -139,7 +139,7 @@ verify(int n, void *buf, unsigned int size)
 	reporting = 1;
 
 	while (size > 0) {
-		unsigned int chunksiz = nextchunksiz(size, 64*1024);
+		size_t chunksiz = nextchunksiz(size, 64*1024);
 		r = read(fd, buf, chunksiz);
 		chkread(r, chunksiz);
 		if (checkbuf(n, buf, chunksiz) == 0 && reporting) {
@@ -158,7 +158,7 @@ verify(int n, void *buf, unsigned int size)
 }
 
 void
-writef(int n, void *buf, unsigned int size)
+writef(int n, void *buf, size_t size)
 {
 	int fd = open(path, O_WRONLY | O_CREAT | O_EXCL);
 	if (fd < 0)
@@ -166,7 +166,7 @@ writef(int n, void *buf, unsigned int size)
 
 	/* XXX: should use adjustable threshold */
 	while (size > 0) {
-		unsigned int chunksiz = nextchunksiz(size, 64*1024);
+		size_t chunksiz = nextchunksiz(size, 64*1024);
 		fillbuf(n, buf, chunksiz);
 		if (write(fd, buf, chunksiz) < 0)
 			err(1, "write");
@@ -202,7 +202,7 @@ main(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "f:i:p:rs:t:vS")) != -1) {
 		switch (ch) {
 		case 'f':
-			maxfilesiz = strtonum(optarg, 1, UINT_MAX, &errstr);
+			maxfilesiz = strtonum(optarg, 1, SSIZE_MAX, &errstr);
 			if (errstr)
 				errx(1, "-f: max file size %s", errstr);
 			break;
@@ -225,7 +225,7 @@ main(int argc, char **argv)
 				errx(1, "-s: seed %s", errstr);
 			break;
 		case 't':
-			totalbytes = strtonum(optarg, 1, UINT_MAX, &errstr);
+			totalbytes = strtonum(optarg, 1, SSIZE_MAX, &errstr);
 			if (errstr)
 				errx(1, "-t: total bytes %s", errstr);
 			break;
@@ -267,14 +267,14 @@ main(int argc, char **argv)
 	}
 
 	printf("using random seed: %u\n", seed);
-	printf("max file size: %u bytes\n", maxfilesiz);
-	printf("total being written: %u bytes\n", totalbytes);
+	printf("max file size: %zu bytes\n", maxfilesiz);
+	printf("total being written: %zu bytes\n", totalbytes);
 	srand(seed);
 
 	while (totalbytes > 0) {
-		unsigned int filesiz = nextfilesiz();
+		size_t filesiz = nextfilesiz();
 		mkpath(n);
-		printf("%s %s (%u bytes)\n", action, path, filesiz);
+		printf("%s %s (%zu bytes)\n", action, path, filesiz);
 		if (verifying)
 			verify(n++, buf, filesiz);
 		else
