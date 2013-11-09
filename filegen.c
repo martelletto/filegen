@@ -1,10 +1,4 @@
-/*
- * Copyright 2013 by Pedro Martelletto <pedro@ambientworks.net>.
- *
- * Modification and redistribution in source and binary forms is permitted
- * provided that due credit is given to the author by leaving this copyright
- * notice intact.
- */
+/* see copyright notice in LICENSE */
 
 #include <sys/time.h>
 
