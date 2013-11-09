@@ -1,6 +1,8 @@
 /* see copyright notice in LICENSE */
 
+#include <sys/types.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #include <err.h>
 #include <fcntl.h>
@@ -160,7 +162,7 @@ verify(int n, void *buf, size_t size)
 void
 writef(int n, void *buf, size_t size)
 {
-	int fd = open(path, O_WRONLY | O_CREAT | O_EXCL);
+	int fd = open(path, O_WRONLY|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR);
 	if (fd < 0)
 		err(1, "open");
 
