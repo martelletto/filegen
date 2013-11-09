@@ -249,7 +249,7 @@ main(int argc, char **argv)
 	if (maxfilesiz > totalbytes)
 		errx(1, "max file size bigger than total size");
 	if (interval != 0 && verifying)
-		errx(1, "interval when verifying doesn't make sense");
+		warn("interval when verifying doesn't make sense");
 
 	if (chdir(argv[0]) != 0)
 		err(1, "chdir");
