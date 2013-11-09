@@ -1,5 +1,4 @@
-CFLAGS+= -Wall -W -Wshadow -Wwrite-strings -Wshorten-64-to-32 -std=c99
-CFLAGS+= -pedantic-errors
+CFLAGS+= -Wall -W -Wshadow -Wwrite-strings -std=c99 -pedantic-errors
 
 filegen: filegen.c
 	$(CC) $(CFLAGS) filegen.c -o $(.TARGET)
