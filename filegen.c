@@ -15,9 +15,9 @@
 #include <unistd.h>
 #include <util.h>
 
-bool debugging = false;		/* print debugging info */
 bool syncwrite = false;		/* call fsync() before closing */
 bool randomise = false;		/* whether to write random bytes */
+bool verbose = false;		/* verbose mode */
 long interval = 0;		/* max nanosecs between writes */
 size_t maxfilesiz = 1 << 24;	/* max size of individual file */
 size_t totalbytes = 1 << 30;	/* total bytes to write/verify */
@@ -209,7 +209,7 @@ __dead void
 usage(void)
 {
 	fprintf(stderr,
-"usage: filegen [-drvS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
+"usage: filegen [-drVS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
 "               [-t totalbytes] directory\n");
 	exit(1);
 }
@@ -223,11 +223,8 @@ main(int argc, char **argv)
 	const char *action = "writing";
 	void *buf;
 
-	while ((ch = getopt(argc, argv, "df:i:p:rs:t:vS")) != -1) {
+	while ((ch = getopt(argc, argv, "df:i:p:rs:t:vVS")) != -1) {
 		switch (ch) {
-		case 'd':
-			debugging = true;
-			break;
 		case 'f':
 			maxfilesiz = strtonum(optarg, 1, SSIZE_MAX, &errstr);
 			if (errstr)
@@ -257,6 +254,9 @@ main(int argc, char **argv)
 				errx(1, "-t: total bytes %s", errstr);
 			break;
 		case 'v':
+			verbose = true;
+			break;
+		case 'V':
 			action = "verifying";
 			verifying = 1;
 			break;
@@ -294,7 +294,7 @@ main(int argc, char **argv)
 	}
 	srand(seed);
 
-	if (debugging) {
+	if (verbose) {
 		printf("using random seed: %u\n", seed);
 		printf("max file size: %zu bytes\n", maxfilesiz);
 		printf("total being written: %zu bytes\n", totalbytes);
@@ -303,7 +303,7 @@ main(int argc, char **argv)
 	while (totalbytes > 0) {
 		size_t filesiz = nextfilesiz();
 		mkpath(n);
-		if (debugging)
+		if (verbose)
 			printf("%s %s (%zu bytes)\n", action, path, filesiz);
 		if (verifying)
 			verify(n++, buf, filesiz);
