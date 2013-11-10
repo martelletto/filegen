@@ -53,11 +53,9 @@ nextchunksiz(size_t size, size_t threshold)
 size_t
 nextword(int n)
 {
-	if (randomise == false) {
-		size_t r;
-		memset(&r, n, sizeof(r));
-		return (r);
-	} else
+	if (randomise == false)
+		return (n);
+	else
 		return (nextrand(RAND_MAX));
 }
 
