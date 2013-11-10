@@ -91,16 +91,15 @@ fillchunk(int n, void *buf, size_t size)
 	}
 }
 
-int
-checkchunk(int n, void *buf, size_t size)
+bool
+chunkok(int n, void *buf, size_t size)
 {
 	size_t *p = buf, rest = size % sizeof(size_t);
-	int ok = 1;
 	size -= rest;
+	bool ok = true;
 
 	while (size > 0) {
-		if (*p++ != nextword(n))
-			ok = 0;
+		if (*p++ != nextword(n)) ok = false;
 		size -= sizeof(size_t);
 	}
 
@@ -109,8 +108,7 @@ checkchunk(int n, void *buf, size_t size)
 		unsigned char *cp1 = (unsigned char *)p;
 		unsigned char *cp2 = (unsigned char *)&last;
 		while (rest--)
-			if (*cp1++ != *cp2++)
-				ok = 0;
+			if (*cp1++ != *cp2++) ok = false;
 	}
 
 	return (ok);
@@ -166,7 +164,7 @@ verify(int n, void *buf, size_t size)
 		size_t chunksiz = nextchunksiz(size, 64*1024);
 		r = read(fd, buf, chunksiz);
 		chkread(r, chunksiz);
-		if (checkchunk(n, buf, chunksiz) == 0)
+		if (chunkok(n, buf, chunksiz) == false)
 			warnx("%s: corrupt chunk", path);
 		size -= chunksiz;
 	}
