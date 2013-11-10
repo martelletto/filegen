@@ -63,7 +63,7 @@ void
 mkpath(int n)
 {
 	size_t len = sizeof(path) - 1;
-	int r = snprintf(path, len, "%s%x", prefix, n);
+	int r = snprintf(path, len, "%sf%04x", prefix, n);
 	if (r < 0 || (size_t)r >= len)
 		errx(1, "snprintf");
 }
