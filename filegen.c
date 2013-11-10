@@ -276,10 +276,6 @@ main(int argc, char **argv)
 
 	if (maxfilesiz > totalbytes)
 		errx(1, "max file size bigger than total size");
-	if (interval != 0 && verifying)
-		warnx("interval when verifying doesn't make sense; ignoring");
-	if (syncwrite != 0 && verifying)
-		warnx("syncing when verifying doesn't make sense; ignoring");
 
 	if (chdir(argv[0]) != 0)
 		err(1, "chdir %s", argv[0]);
