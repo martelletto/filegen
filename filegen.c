@@ -117,12 +117,12 @@ chunkok(int n, void *buf, size_t size)
 bool
 readok(ssize_t nread, size_t chunksiz)
 {
-	if (nread != (ssize_t)chunksiz) {
+	bool ok = nread == (ssize_t)chunksiz;
+	if (ok == false) {
 		if (nread < 0) warn("read %s", path);
 		else warnx("%s: file shorter than expected", path);
-		return (false);
 	}
-	return (true);
+	return (ok);
 }
 
 void
@@ -149,7 +149,7 @@ skipfile(int n, size_t size)
 }
 
 void
-verify(int n, void *buf, size_t size)
+verifyfile(int n, void *buf, size_t size)
 {
 	ssize_t r;
 
@@ -182,7 +182,7 @@ verify(int n, void *buf, size_t size)
 }
 
 void
-writef(int n, void *buf, size_t size)
+writefile(int n, void *buf, size_t size)
 {
 	int fd = open(path, O_WRONLY|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR);
 	if (fd < 0)
@@ -302,9 +302,9 @@ main(int argc, char **argv)
 		if (verbose)
 			printf("%s %s (%zu bytes)\n", action, path, filesiz);
 		if (verifying)
-			verify(n++, buf, filesiz);
+			verifyfile(n++, buf, filesiz);
 		else
-			writef(n++, buf, filesiz);
+			writefile(n++, buf, filesiz);
 		totalbytes -= filesiz;
 	}
 
