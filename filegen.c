@@ -122,11 +122,9 @@ chkread(ssize_t nread, size_t chunksiz)
 {
 	if (nread != (ssize_t)chunksiz) {
 		if (nread < 0)
-			warn("read");
-		else if (nread == 0)
-			warnx("file truncated");
+			warn("read %s", path);
 		else
-			warnx("short read");
+			warnx("%s: file shorter than expected", path);
 	}
 }
 
@@ -170,14 +168,14 @@ verify(int n, void *buf, size_t size)
 		r = read(fd, buf, chunksiz);
 		chkread(r, chunksiz);
 		if (checkchunk(n, buf, chunksiz) == 0)
-			warnx("file corrupt");
+			warnx("%s: corrupt chunk", path);
 		size -= chunksiz;
 	}
 
 	char c;
 	r = read(fd, &c, sizeof(c));
 	if (r != 0)
-		warnx("file longer than expected");
+		warnx("%s: file longer than expected", path);
 
 	close(fd);
 }
@@ -187,14 +185,14 @@ writef(int n, void *buf, size_t size)
 {
 	int fd = open(path, O_WRONLY|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR);
 	if (fd < 0)
-		err(1, "open");
+		err(1, "open %s", path);
 
 	/* XXX: should use adjustable threshold */
 	while (size > 0) {
 		size_t chunksiz = nextchunksiz(size, 64*1024);
 		fillchunk(n, buf, chunksiz);
 		if (write(fd, buf, chunksiz) < 0)
-			err(1, "write");
+			err(1, "write %s", path);
 		size -= chunksiz;
 		if (interval)
 			nanosleep(&itv, NULL);
@@ -283,7 +281,7 @@ main(int argc, char **argv)
 		warnx("syncing when verifying doesn't make sense; ignoring");
 
 	if (chdir(argv[0]) != 0)
-		err(1, "chdir");
+		err(1, "chdir %s", argv[0]);
 	buf = malloc(maxfilesiz);
 	if (buf == NULL)
 		err(1, "malloc");
