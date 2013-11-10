@@ -30,8 +30,11 @@ static char path[_POSIX_PATH_MAX + 1];
 size_t
 nextrand(size_t limit)
 {
-	size_t r;
-	while ((r = (size_t)rand()) > limit);
+	if (limit < 2)
+		return (limit);
+	size_t r = (size_t)rand();
+	if (r > limit)
+		return (r % limit);
 	return (r);
 }
 
