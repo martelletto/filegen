@@ -114,15 +114,15 @@ chunkok(int n, void *buf, size_t size)
 	return (ok);
 }
 
-void
-chkread(ssize_t nread, size_t chunksiz)
+bool
+readok(ssize_t nread, size_t chunksiz)
 {
 	if (nread != (ssize_t)chunksiz) {
-		if (nread < 0)
-			warn("read %s", path);
-		else
-			warnx("%s: file shorter than expected", path);
+		if (nread < 0) warn("read %s", path);
+		else warnx("%s: file shorter than expected", path);
+		return (false);
 	}
+	return (true);
 }
 
 void
@@ -163,7 +163,11 @@ verify(int n, void *buf, size_t size)
 	while (size > 0) {
 		size_t chunksiz = nextchunksiz(size, 64*1024);
 		r = read(fd, buf, chunksiz);
-		chkread(r, chunksiz);
+		if (readok(r, chunksiz) == false) {
+			skipfile(n, size);
+			close(fd);
+			return;
+		}
 		if (chunkok(n, buf, chunksiz) == false)
 			warnx("%s: corrupt chunk", path);
 		size -= chunksiz;
