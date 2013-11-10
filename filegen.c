@@ -7,6 +7,7 @@
 #include <err.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,10 +15,10 @@
 #include <unistd.h>
 #include <util.h>
 
-long randomise = 0;		/* whether to write random bytes */
-long reporting = 1;		/* report corrupt/invalid files */
+bool syncwrite = false;		/* call fsync() before closing */
+bool randomise = false;		/* whether to write random bytes */
+bool reporting = true;		/* report corrupt/invalid files */
 long interval = 0;		/* max nanosecs between writes */
-long syncwrite = 0;		/* call fsync() before closing */
 size_t maxfilesiz = 1 << 24;	/* max size of individual file */
 size_t totalbytes = 1 << 30;	/* total bytes to write/verify */
 const char *prefix = "";	/* prefix for test files */
@@ -52,7 +53,7 @@ nextchunksiz(size_t size, size_t threshold)
 size_t
 nextbyte(int n)
 {
-	if (randomise == 0) {
+	if (randomise == false) {
 		size_t r;
 		memset(&r, n, sizeof(r));
 		return (r);
@@ -119,7 +120,7 @@ void
 chkread(ssize_t nread, size_t chunksiz)
 {
 	if (reporting && nread != (ssize_t)chunksiz) {
-		reporting = 0;
+		reporting = false;
 		if (nread < 0)
 			warn("read");
 		else if (nread == 0)
@@ -138,7 +139,7 @@ verify(int n, void *buf, size_t size)
 	if (fd < 0)
 		err(1, "open");
 
-	reporting = 1;
+	reporting = true;
 
 	while (size > 0) {
 		size_t chunksiz = nextchunksiz(size, 64*1024);
@@ -146,7 +147,7 @@ verify(int n, void *buf, size_t size)
 		chkread(r, chunksiz);
 		if (checkbuf(n, buf, chunksiz) == 0 && reporting) {
 			warnx("file corrupt");
-			reporting = 0;
+			reporting = false;
 		}
 		size -= chunksiz;
 	}
@@ -216,7 +217,7 @@ main(int argc, char **argv)
 			itv.tv_nsec = interval;
 			break;
 		case 'r':
-			randomise = 1;
+			randomise = false;
 			break;
 		case 'p':
 			prefix = optarg;
@@ -236,7 +237,7 @@ main(int argc, char **argv)
 			verifying = 1;
 			break;
 		case 'S':
-			syncwrite = 1;
+			syncwrite = true;
 			break;
 		default:
 			usage();
