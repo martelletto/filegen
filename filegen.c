@@ -209,7 +209,7 @@ __dead void
 usage(void)
 {
 	fprintf(stderr,
-"usage: filegen [-drVS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
+"usage: filegen [-drvVS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
 "               [-t totalbytes] directory\n");
 	exit(1);
 }
