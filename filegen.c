@@ -74,8 +74,7 @@ mkpath(int n)
 void
 fillchunk(int n, void *buf, size_t size)
 {
-	size_t *p = buf;
-	int rest = size % sizeof(size_t);
+	size_t *p = buf, rest = size % sizeof(size_t);
 	size -= rest;
 
 	while (size > 0) {
@@ -95,8 +94,8 @@ fillchunk(int n, void *buf, size_t size)
 int
 checkchunk(int n, void *buf, size_t size)
 {
-	size_t *p = buf;
-	int ok = 1, rest = size % sizeof(size_t);
+	size_t *p = buf, rest = size % sizeof(size_t);
+	int ok = 1;
 	size -= rest;
 
 	while (size > 0) {
@@ -131,7 +130,7 @@ chkread(ssize_t nread, size_t chunksiz)
 void
 skipchunk(int n, size_t size)
 {
-	int rest = size % sizeof(size_t);
+	size_t rest = size % sizeof(size_t);
 	size -= rest;
 	while (size > 0) {
 		nextword(n);
