@@ -238,7 +238,7 @@ main(int argc, char **argv)
 			itv.tv_nsec = interval;
 			break;
 		case 'r':
-			randomise = false;
+			randomise = true;
 			break;
 		case 'p':
 			prefix = optarg;
