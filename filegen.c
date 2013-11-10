@@ -133,13 +133,39 @@ chkread(ssize_t nread, size_t chunksiz)
 }
 
 void
+skipchunk(int n, size_t size)
+{
+	int rest = size % sizeof(size_t);
+	size -= rest;
+	while (size > 0) {
+		nextword(n);
+		size -= sizeof(size_t);
+	}
+	if (rest != 0)
+		nextword(n);
+}
+
+void
+skipfile(int n, size_t size)
+{
+	while (size > 0) {
+		size_t chunksiz = nextchunksiz(size, 64*1024);
+		skipchunk(n, chunksiz);
+		size -= chunksiz;
+	}
+}
+
+void
 verify(int n, void *buf, size_t size)
 {
 	ssize_t r;
 
 	int fd = open(path, O_RDONLY);
-	if (fd < 0)
-		err(1, "open");
+	if (fd < 0) {
+		warn("open %s", path);
+		skipfile(n, size);
+		return;
+	}
 
 	reporting = true;
 
