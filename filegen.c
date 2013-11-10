@@ -51,7 +51,7 @@ nextchunksiz(size_t size, size_t threshold)
 }
 
 size_t
-nextbyte(int n)
+nextword(int n)
 {
 	if (randomise == false) {
 		size_t r;
@@ -78,12 +78,12 @@ fillbuf(int n, void *buf, size_t size)
 	size -= rest;
 
 	while (size > 0) {
-		*p++ = nextbyte(n);
+		*p++ = nextword(n);
 		size -= sizeof(size_t);
 	}
 
 	if (rest != 0) {
-		size_t last = nextbyte(n);
+		size_t last = nextword(n);
 		unsigned char *cp1 = (unsigned char *)p;
 		unsigned char *cp2 = (unsigned char *)&last;
 		while (rest--)
@@ -99,13 +99,13 @@ checkbuf(int n, void *buf, size_t size)
 	size -= rest;
 
 	while (size > 0) {
-		if (*p++ != nextbyte(n))
+		if (*p++ != nextword(n))
 			ok = 0;
 		size -= sizeof(size_t);
 	}
 
 	if (rest != 0) {
-		size_t last = nextbyte(n);
+		size_t last = nextword(n);
 		unsigned char *cp1 = (unsigned char *)p;
 		unsigned char *cp2 = (unsigned char *)&last;
 		while (rest--)
