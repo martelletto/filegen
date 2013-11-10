@@ -18,7 +18,6 @@
 bool debugging = false;		/* print debugging info */
 bool syncwrite = false;		/* call fsync() before closing */
 bool randomise = false;		/* whether to write random bytes */
-bool reporting = true;		/* report corrupt/invalid files */
 long interval = 0;		/* max nanosecs between writes */
 size_t maxfilesiz = 1 << 24;	/* max size of individual file */
 size_t totalbytes = 1 << 30;	/* total bytes to write/verify */
@@ -121,8 +120,7 @@ checkchunk(int n, void *buf, size_t size)
 void
 chkread(ssize_t nread, size_t chunksiz)
 {
-	if (reporting && nread != (ssize_t)chunksiz) {
-		reporting = false;
+	if (nread != (ssize_t)chunksiz) {
 		if (nread < 0)
 			warn("read");
 		else if (nread == 0)
@@ -167,22 +165,18 @@ verify(int n, void *buf, size_t size)
 		return;
 	}
 
-	reporting = true;
-
 	while (size > 0) {
 		size_t chunksiz = nextchunksiz(size, 64*1024);
 		r = read(fd, buf, chunksiz);
 		chkread(r, chunksiz);
-		if (checkchunk(n, buf, chunksiz) == 0 && reporting) {
+		if (checkchunk(n, buf, chunksiz) == 0)
 			warnx("file corrupt");
-			reporting = false;
-		}
 		size -= chunksiz;
 	}
 
 	char c;
 	r = read(fd, &c, sizeof(c));
-	if (r != 0 && reporting)
+	if (r != 0)
 		warnx("file longer than expected");
 
 	close(fd);
