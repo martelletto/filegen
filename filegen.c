@@ -209,7 +209,7 @@ __dead void
 usage(void)
 {
 	fprintf(stderr,
-"usage: filegen [-drvVS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
+"usage: filegen [-rvVS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
 "               [-t totalbytes] directory\n");
 	exit(1);
 }
@@ -223,7 +223,7 @@ main(int argc, char **argv)
 	const char *action = "writing";
 	void *buf;
 
-	while ((ch = getopt(argc, argv, "df:i:p:rs:t:vVS")) != -1) {
+	while ((ch = getopt(argc, argv, "f:i:p:rs:t:vVS")) != -1) {
 		switch (ch) {
 		case 'f':
 			maxfilesiz = strtonum(optarg, 1, SSIZE_MAX, &errstr);
