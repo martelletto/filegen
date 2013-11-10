@@ -1,0 +1,112 @@
+.\" see copyright notice in LICENSE
+.Dd $Mdocdate: November 9 2013 $
+.Dt FILEGEN 1
+.Os
+.Sh NAME
+.Nm filegen
+.Nd predictable file generator program
+.Sh SYNOPSIS
+.Nm filegen
+.Bk -words
+.Op Fl rvVS
+.Op Fl f Ar maxfilesiz
+.Op Fl i Ar interval
+.Op Fl p Ar prefix
+.Op Fl s Ar seed
+.Op Fl t Ar totalbytes
+.Ar directory
+.Ek
+.Sh DESCRIPTION
+.Nm
+is a program to write files of random sizes and random content in a
+predictable way.
+The idea is to generate files for post-mortem file system analysis.
+.Nm
+can also be used to verify the integrity of files it generated.
+.Pp
+Every file written by
+.Nm
+is numbered and may receive an optional prefix.
+By default, file number 1 will be named
+.Em f0000
+and composed entirely of 0-valued words, file number 1 will be
+named
+.Em f0001
+and consist of 1-valued words, and so on.
+A word contains
+.Fn sizeof size_t
+bytes.
+This behaviour
+allows misallocated file system blocks to be diagnosed quickly, and
+can be switched off by using option
+.Fl r .
+.Pp
+Files are written by
+.Nm
+in chunks of random sizes and placed inside
+.Em directory .
+The size of each individual chunk does not exceed 64KB.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl r
+Randomise the contents of each file.
+.It Fl v
+Enable verbose mode.
+.It Fl V
+Verify the contents of files in
+.Em directory .
+If this option is specified,
+.Nm
+does not write any data.
+.It Fl S
+Call
+.Xr fsync 2
+after writing each file.
+.It Fl f Ar maxfilesiz
+The maximum size of each file in bytes.
+The default is 16MB.
+.It Fl i Ar interval
+The interval between two consecutive writes in nanoseconds.
+The default is zero.
+.It Fl p Ar prefix
+The prefix used when naming files.
+The default is an empty string.
+.It Fl s Ar seed
+The seed used to initialise the sequence of pseudo-random numbers
+used by
+.Nm .
+By default, a time-derived seed is used.
+.It Fl t Ar totalbytes
+The total amount of bytes to be written.
+The default is 1GB.
+.El
+.Sh EXAMPLES
+One could use the script below to write 128GB worth of data in
+.Pa /stage
+using 16 concurrent processes, with random contents and each file
+holding 128MB at most, an interval of 0.5ms between writes, and
+6010 as a seed:
+.Bd -literal -offset indent
+# cat << 'EOF' > run.sh
+T=8589934592	# 8GB
+F=134217728	# 128MB
+S=6010		# seed
+I=500000	# 0.5ms
+jot -c 16 A | xargs -t -n 1 -J % -P 16 \e
+	filegen $1 -r -i $I -t $T -f $F -s $S -p % /stage
+EOF
+.Ed
+.Pp
+It would then be possible to dispatch the processes using:
+.Bd -literal -offset indent
+# sh run.sh
+.Ed
+.Pp
+After a simulated (or actual) power outage, the files could be
+verified using:
+.Bd -literal -offset indent
+# sh run.sh -V
+.Ed
+.Sh AUTHORS
+.An Pedro Martelletto Aq Mt pedro@ambientworks.net
