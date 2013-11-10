@@ -73,7 +73,7 @@ mkpath(int n)
 }
 
 void
-fillbuf(int n, void *buf, size_t size)
+fillchunk(int n, void *buf, size_t size)
 {
 	size_t *p = buf;
 	int rest = size % sizeof(size_t);
@@ -94,7 +94,7 @@ fillbuf(int n, void *buf, size_t size)
 }
 
 int
-checkbuf(int n, void *buf, size_t size)
+checkchunk(int n, void *buf, size_t size)
 {
 	size_t *p = buf;
 	int ok = 1, rest = size % sizeof(size_t);
@@ -173,7 +173,7 @@ verify(int n, void *buf, size_t size)
 		size_t chunksiz = nextchunksiz(size, 64*1024);
 		r = read(fd, buf, chunksiz);
 		chkread(r, chunksiz);
-		if (checkbuf(n, buf, chunksiz) == 0 && reporting) {
+		if (checkchunk(n, buf, chunksiz) == 0 && reporting) {
 			warnx("file corrupt");
 			reporting = false;
 		}
@@ -198,7 +198,7 @@ writef(int n, void *buf, size_t size)
 	/* XXX: should use adjustable threshold */
 	while (size > 0) {
 		size_t chunksiz = nextchunksiz(size, 64*1024);
-		fillbuf(n, buf, chunksiz);
+		fillchunk(n, buf, chunksiz);
 		if (write(fd, buf, chunksiz) < 0)
 			err(1, "write");
 		size -= chunksiz;
