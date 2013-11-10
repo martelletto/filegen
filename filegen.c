@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <util.h>
 
+bool debugging = false;		/* print debugging info */
 bool syncwrite = false;		/* call fsync() before closing */
 bool randomise = false;		/* whether to write random bytes */
 bool reporting = true;		/* report corrupt/invalid files */
@@ -186,7 +187,7 @@ __dead void
 usage(void)
 {
 	fprintf(stderr,
-"usage: filegen [-rvS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
+"usage: filegen [-drvS] [-f maxfilesiz] [-i interval] [-p prefix] [-s seed]\n"
 "               [-t totalbytes] directory\n");
 	exit(1);
 }
@@ -200,8 +201,11 @@ main(int argc, char **argv)
 	const char *action = "writing";
 	void *buf;
 
-	while ((ch = getopt(argc, argv, "f:i:p:rs:t:vS")) != -1) {
+	while ((ch = getopt(argc, argv, "df:i:p:rs:t:vS")) != -1) {
 		switch (ch) {
+		case 'd':
+			debugging = true;
+			break;
 		case 'f':
 			maxfilesiz = strtonum(optarg, 1, SSIZE_MAX, &errstr);
 			if (errstr)
@@ -266,16 +270,19 @@ main(int argc, char **argv)
 			err(1, "gettimeofday");
 		seed = (unsigned)(tv.tv_sec ^ tv.tv_usec);
 	}
-
-	printf("using random seed: %u\n", seed);
-	printf("max file size: %zu bytes\n", maxfilesiz);
-	printf("total being written: %zu bytes\n", totalbytes);
 	srand(seed);
+
+	if (debugging) {
+		printf("using random seed: %u\n", seed);
+		printf("max file size: %zu bytes\n", maxfilesiz);
+		printf("total being written: %zu bytes\n", totalbytes);
+	}
 
 	while (totalbytes > 0) {
 		size_t filesiz = nextfilesiz();
 		mkpath(n);
-		printf("%s %s (%zu bytes)\n", action, path, filesiz);
+		if (debugging)
+			printf("%s %s (%zu bytes)\n", action, path, filesiz);
 		if (verifying)
 			verify(n++, buf, filesiz);
 		else
