@@ -99,15 +99,16 @@ fillchunk(int n, void *buf, size_t size)
 	}
 }
 
-bool
+int
 chunkok(int n, void *buf, size_t size)
 {
 	size_t *p = buf, rest = size % sizeof(size_t);
 	size -= rest;
-	bool ok = true;
+	int ok = 1;
 
 	while (size > 0) {
-		if (*p++ != nextword(n)) ok = false;
+		if (*p++ != nextword(n))
+			ok = 0;
 		size -= sizeof(size_t);
 	}
 
@@ -116,17 +117,18 @@ chunkok(int n, void *buf, size_t size)
 		unsigned char *cp1 = (unsigned char *)p;
 		unsigned char *cp2 = (unsigned char *)&last;
 		while (rest--)
-			if (*cp1++ != *cp2++) ok = false;
+			if (*cp1++ != *cp2++)
+				ok = 0;
 	}
 
 	return (ok);
 }
 
-bool
+int
 readok(ssize_t nread, size_t chunksiz)
 {
-	bool ok = nread == (ssize_t)chunksiz;
-	if (ok == false) {
+	int ok = nread == (ssize_t)chunksiz;
+	if (!ok) {
 		if (nread < 0)
 			warn("read %s", path);
 		else
@@ -158,37 +160,43 @@ skipfile(int n, size_t size)
 	}
 }
 
-void
+int
 verifyfile(int n, void *buf, size_t size)
 {
 	ssize_t r;
+	int ok = 1;
 
 	int fd = open(path, O_RDONLY);
 	if (fd < 0) {
 		warn("open %s", path);
 		skipfile(n, size);
-		return;
+		return (0);
 	}
 
 	while (size > 0) {
 		size_t chunksiz = nextchunksiz(size, 64*1024);
 		r = read(fd, buf, chunksiz);
-		if (readok(r, chunksiz) == false) {
+		if (!readok(r, chunksiz)) {
 			skipfile(n, size);
 			close(fd);
-			return;
+			return (0);
 		}
-		if (chunkok(n, buf, chunksiz) == false)
+		if (!chunkok(n, buf, chunksiz)) {
 			warnx("%s: corrupt chunk", path);
+			ok = 0;
+		}
 		size -= chunksiz;
 	}
 
 	char c;
 	r = read(fd, &c, sizeof(c));
-	if (r != 0)
+	if (r != 0) {
 		warnx("%s: file longer than expected", path);
-
+		ok = 0;
+	}
 	close(fd);
+
+	return (ok);
 }
 
 void
@@ -227,7 +235,7 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-	int ch, n = 0, verifying = 0;
+	int ch, n = 0, ok = 1, verifying = 0;
 	unsigned int seed = 0;
 	const char *errstr;
 	const char *action = "writing";
@@ -312,11 +320,11 @@ main(int argc, char **argv)
 		if (verbose)
 			printf("%s %s (%zu bytes)\n", action, path, filesiz);
 		if (verifying)
-			verifyfile(n++, buf, filesiz);
+			ok &= verifyfile(n++, buf, filesiz);
 		else
 			writefile(n++, buf, filesiz);
 		totalbytes -= filesiz;
 	}
 
-	exit(0);
+	exit(ok == 0);
 }
