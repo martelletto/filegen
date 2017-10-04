@@ -29,7 +29,7 @@ Every file written by
 is numbered and may receive an optional prefix.
 By default, file number 1 will be named
 .Em f0000
-and composed entirely of 0-valued words, file number 1 will be
+and composed entirely of 0-valued words, file number 2 will be
 named
 .Em f0001
 and consist of 1-valued words, and so on.
@@ -50,11 +50,11 @@ The size of each individual chunk cannot exceed 64KB.
 The options are as follows:
 .Bl -tag -width Ds
 .It Fl r
-Randomise the contents of each file.
+Randomise the content of each file.
 .It Fl v
 Enable verbose mode.
 .It Fl V
-Verify the contents of files in
+Verify the content of files in
 .Em directory .
 If this option is specified,
 .Nm
@@ -84,7 +84,7 @@ The default is 1GB.
 .Sh EXAMPLES
 One could use the script below to write 128GB worth of data in
 .Pa /stage
-using 16 concurrent processes, with random contents and each file
+using 16 concurrent processes, with random content and each file
 holding 128MB at most, an interval of 0.5ms between writes, and
 6010 as a seed:
 .Bd -literal -offset indent
@@ -103,7 +103,7 @@ It would then be possible to dispatch the processes using:
 # sh run.sh
 .Ed
 .Pp
-After a simulated (or actual) power outage, the files could be
+After a simulated (or actual) outage, the files could be
 verified using:
 .Bd -literal -offset indent
 # sh run.sh -V
