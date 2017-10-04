@@ -45,6 +45,12 @@ jot -c 16 A | xargs -t -n 1 -J % -P 16 filegen $1 -r -i $I -t $T -f $F -s $S -p 
 EOF
 ```
 
+**Note**: On Linux with bash or zsh you can replace *jot* with:
+
+```
+use *echo {A..P} | tr ' ' '\n'
+```
+
 It would then be possible to dispatch the processes using:
 
 ```
