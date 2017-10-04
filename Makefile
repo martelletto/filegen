@@ -1,11 +1,12 @@
 CFLAGS+= -Wall -W -Wshadow -Wwrite-strings -std=c99 -pedantic-errors
 
-filegen: filegen.c
-	$(CC) $(CFLAGS) filegen.c -o $(.TARGET)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+filegen: strtonum.o filegen.o
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -f filegen
+	rm -f filegen *.o
 
 all: filegen
-
-.include <bsd.prog.mk>

@@ -1,5 +1,9 @@
 /* see copyright notice in LICENSE */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -13,7 +17,11 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#ifndef __linux__
 #include <util.h>
+#else
+long long strtonum(const char *, long long, long long, const char **);
+#endif
 
 bool syncwrite = false;		/* call fsync() before closing */
 bool randomise = false;		/* whether to write random bytes */
@@ -24,7 +32,7 @@ size_t totalbytes = 1 << 30;	/* total bytes to write/verify */
 const char *prefix = "";	/* prefix for test files */
 
 static struct timespec itv;
-static char path[_POSIX_PATH_MAX + 1];
+static char path[PATH_MAX + 1];
 
 size_t
 nextrand(size_t limit)
