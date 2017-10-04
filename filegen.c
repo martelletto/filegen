@@ -119,8 +119,10 @@ readok(ssize_t nread, size_t chunksiz)
 {
 	bool ok = nread == (ssize_t)chunksiz;
 	if (ok == false) {
-		if (nread < 0) warn("read %s", path);
-		else warnx("%s: file shorter than expected", path);
+		if (nread < 0)
+			warn("read %s", path);
+		else
+			warnx("%s: file shorter than expected", path);
 	}
 	return (ok);
 }
