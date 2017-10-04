@@ -4,7 +4,7 @@
 .Os
 .Sh NAME
 .Nm filegen
-.Nd predictable file generator program
+.Nd predictable file generation
 .Sh SYNOPSIS
 .Nm filegen
 .Bk -words
@@ -45,7 +45,7 @@ Files are written by
 .Nm
 in chunks of random sizes and placed inside
 .Em directory .
-The size of each individual chunk does not exceed 64KB.
+The size of each individual chunk cannot exceed 64KB.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
@@ -58,7 +58,7 @@ Verify the contents of files in
 .Em directory .
 If this option is specified,
 .Nm
-does not write any data.
+does not write data.
 .It Fl S
 Call
 .Xr fsync 2
