@@ -45,10 +45,16 @@ jot -c 16 A | xargs -t -n 1 -J % -P 16 filegen $1 -r -i $I -t $T -f $F -s $S -p 
 EOF
 ```
 
-**Note**: On Linux with bash or zsh you can replace *jot* with:
+Or, on Linux with bash or zsh:
 
 ```
-use *echo {A..P} | tr ' ' '\n'
+# cat << 'EOF' > run.sh
+T=8589934592    # 8GB
+F=134217728     # 128MB
+S=6010          # seed
+I=500000        # 0.5ms
+echo {A..P} | tr ' ' '\n' | xargs -t -n 1 -I {} -P 16 ./filegen $1 -r -i $I -t $T -f $F -s $S -p {} /stage
+EOF
 ```
 
 It would then be possible to dispatch the processes using:
