@@ -207,7 +207,7 @@ writefile(int n, void *buf, size_t size)
 	close(fd);
 }
 
-__dead void
+void
 usage(void)
 {
 	fprintf(stderr,
