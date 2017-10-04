@@ -17,11 +17,8 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#ifndef __linux__
-#include <util.h>
-#else
+
 long long strtonum(const char *, long long, long long, const char **);
-#endif
 
 bool syncwrite = false;		/* call fsync() before closing */
 bool randomise = false;		/* whether to write random bytes */

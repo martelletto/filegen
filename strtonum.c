@@ -19,7 +19,6 @@
 
 /* OPENBSD ORIGINAL: lib/libc/stdlib/strtonum.c */
 
-#ifdef __linux__
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
@@ -66,5 +65,3 @@ strtonum(const char *numstr, long long minval, long long maxval,
 
 	return (ll);
 }
-
-#endif /* __linux__ */
