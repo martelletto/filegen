@@ -41,8 +41,7 @@ T=8589934592    # 8GB
 F=134217728     # 128MB
 S=6010          # seed
 I=500000        # 0.5ms
-jot -c 16 A | xargs -t -n 1 -J % -P 16 \
-  filegen $1 -r -i $I -t $T -f $F -s $S -p % /stage
+jot -c 16 A | xargs -t -n 1 -J % -P 16 filegen $1 -r -i $I -t $T -f $F -s $S -p % /stage
 EOF
 ```
 
