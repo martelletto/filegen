@@ -4,7 +4,7 @@
 **filegen** [**-rvVS**] [**-f** *maxfilesiz*] [**-i** *interval*] [**-p** *prefix*] [**-s** *seed*] [**-t** *totalbytes*] *directory*
 
 ## Description
-**filegen** is a program to write files of random sizes and random content in a predictably way. The is to generate files for post-mortem file system analysis. **filegen** can also be used to verify the integrity of files it generated.
+**filegen** is a program to write files of random sizes and random content in a predictable way. The idea is to generate files for post-mortem file system analysis. **filegen** can also be used to verify the integrity of files it generated.
 
 Every file written by **filegen** is numbered and may receive an optional prefix. By default, file number 1 will be named *f0000* and composed entirely of 0-valued words, file number 2 will be named *f0001* and consist of 1-valued words, and so on. A word contains **sizeof**(*size_t*) bytes. This behaviour allows misallocated file system blocks to be diagnosed quickly, and can be switched off by using option **-r**.
 
