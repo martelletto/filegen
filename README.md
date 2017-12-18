@@ -31,7 +31,7 @@ The options are as follows:
 * **-t** *totalbytes*
   * The total amount of bytes to be written. The default is 1GB.
 
-# Examples
+## Examples
 
 One could use the script below to write 128GB worth of data in */stage* using 16 concurrent processes, with random content and each file holding 128MB at most, an interval of 0.5ms between writes, and 6010 as the seed:
 
